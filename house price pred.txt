@@ -1,0 +1,41 @@
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from sklearn.metrics import r2_score
+housing=fetch_california_housing()
+X,y=housing.data,housing.target
+scaler=StandardScaler()
+x=scaler.fit_transform(X)
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=42)
+model=Sequential([
+    Dense(64,activation='relu',input_shape=(X_train.shape[1],)),
+    Dense(64,activation='relu'),
+    Dense(1)
+])
+model.compile(optimizer='adam',loss='mean_squared_error')
+history=model.fit(X_train,y_train,epochs=100,batch_size=32,validation_split=0.2,verbose=0)
+loss=model.evaluate(X_test,y_test)
+print(f'Test Loss: {loss}')
+y_pred_train =model.predict(X_train)
+y_pred_test=model.predict(X_test)
+r2_train=r2_score(y_train,y_pred_train)
+r2_test=r2_score(y_test,y_pred_test)
+print(f'Training R^2 Score:(r2_train)')
+print(f'Test R^2 Score:(r2_test)')
+import matplotlib.pyplot as plt
+plt.plot(history.history['loss'],label='Training Loss')
+plt.plot(history.history['val_loss'],label='Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.title('Training and Validation Loss')
+plt.show()
+plt.plot(history.history['val_loss'],label='Validation R^2')
+plt.plot(history.history['loss'],label='Training R^2')
+plt.xlabel('Epoch')
+plt.ylabel('R^2 score')
+plt.legend()
+plt.title('Training and Validation R^2 Score')
+plt.show()
